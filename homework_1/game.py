@@ -1,26 +1,13 @@
 from itertools import cycle
 from exceptions import PlayerInputError, SetMarkError
-
-
-class Player:
-    def __init__(self, name: str):
-        self.name = name
-
-
-class TicTacPlayer(Player):
-    def __init__(self, name, mark):
-        super().__init__(name)
-        self._mark = mark
-
-    @property
-    def mark(self):
-        return self._mark
+from users import TicTacPlayer
 
 
 class TicTacBoard:
     def __init__(self, size: int = 3):
         self.size = size
         self._map = self._make_board()
+        self._layout = self._make_layout()
 
     def __str__(self):
         string = ''
@@ -30,6 +17,12 @@ class TicTacBoard:
 
     def _make_board(self):
         return [['_'] * self.size for _ in range(self.size)]
+
+    def _make_layout(self):
+        string = ''
+        for nrow in range(self.size):
+            string += ' '.join([str(nrow * self.size + ncol) for ncol in range(self.size)]) + '\n'
+        return string.rstrip('\n')
 
     def set_mark(self, row_number: int,
                  column_number: int, mark):
@@ -55,14 +48,19 @@ class TicTacBoard:
     def show_board(self):
         return str(self)
 
+    def show_extended_board(self):
+        string = ''
+        for nrow, row in enumerate(self._map):
+            string += (' '.join(row) + '\t' +
+                       ' '.join([str(nrow * self.size + ncol) for ncol in range(self.size)]) + '\n')
+        return string.rstrip()
+
     def update_board(self):
         self._map = self._make_board()
 
-    def get_template(self):
-        string = ''
-        for nrow in range(self.size):
-            string += ' '.join([str(nrow * self.size + ncol) for ncol in range(self.size)]) + '\n'
-        return string.rstrip('\n')
+    @property
+    def layout(self):
+        return self._layout
 
 
 class TicTacGame:
@@ -77,7 +75,7 @@ class TicTacGame:
 
         for i in range(self._gamefield.size ** 2):
             player = next(players)
-            self._show_all_board()
+            self._show_extended_board()
             row, column = self._make_move(player)
             if self._gamefield.check_win(row, column, player.mark):
                 self._show_greeting(player)
@@ -115,14 +113,8 @@ class TicTacGame:
     def _show_board(self):
         print(self._gamefield.show_board())
 
-    def _show_all_board(self):
-        # FIX. IndexError?
-        string = ''
-        board = self._gamefield.show_board().split('\n')
-        template = self._gamefield.get_template().split('\n')
-        for i in range(self._gamefield.size):
-            string += board[i] + '\t' + template[i] + '\n'
-        print(string.rstrip())
+    def _show_extended_board(self):
+        print(self._gamefield.show_extended_board())
 
     def _show_greeting(self, winner: TicTacPlayer):
         print(f'Player {winner.name} has won!')
@@ -132,9 +124,9 @@ class TicTacGame:
 
 
 if __name__ == '__main__':
-    name, mark = input('Write first user`s name and mark: name mark (x or o)').split()
+    name, mark = input('Write first user`s name and mark: name mark (x or o) ').split()
     user1 = TicTacPlayer(name, mark)
-    name, mark = input('Write first user`s name and mark: name mark (x or o)').split()
+    name, mark = input('Write first user`s name and mark: name mark (x or o) ').split()
     user2 = TicTacPlayer(name, mark)
     game = TicTacGame(3, user1, user2)
     game.start_game()
