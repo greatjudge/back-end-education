@@ -1,12 +1,13 @@
 from itertools import cycle
+from exceptions import PlayerInputError, SetMarkError
 
 
-class User:
+class Player:
     def __init__(self, name: str):
         self.name = name
 
 
-class TttUser(User):
+class TicTacPlayer(Player):
     def __init__(self, name, mark):
         super().__init__(name)
         self._mark = mark
@@ -16,10 +17,19 @@ class TttUser(User):
         return self._mark
 
 
-class TttField:
+class TicTacBoard:
     def __init__(self, size: int = 3):
         self.size = size
-        self._map = [['_'] * size for _ in range(size)]
+        self._map = self._make_board()
+
+    def __str__(self):
+        string = ''
+        for row in self._map:
+            string += ' '.join(row) + '\n'
+        return string.rstrip('\n')
+
+    def _make_board(self):
+        return [['_'] * self.size for _ in range(self.size)]
 
     def set_mark(self, row_number: int,
                  column_number: int, mark):
@@ -27,9 +37,8 @@ class TttField:
             self._map[row_number][column_number] = mark
             return True
         else:
-            return False
-            # raise ValueError(f'map[{row_number}][{column_number}] must be free, '
-            #                  f'not {self._map[row_number][column_number]}')
+            raise SetMarkError(f'map[{row_number}][{column_number}] must be free, '
+                               f'not {self._map[row_number][column_number]}')
 
     def check_win(self, row_number, column_number, mark):
         vertical = all([self._map[i][column_number] == mark for i in range(self.size)])
@@ -43,62 +52,89 @@ class TttField:
                     horizontal,
                     diagonal))
 
-    def __str__(self):
+    def show_board(self):
+        return str(self)
+
+    def update_board(self):
+        self._map = self._make_board()
+
+    def get_template(self):
         string = ''
-        for row in self._map:
-            string += ' '.join(row) + '\n'
+        for nrow in range(self.size):
+            string += ' '.join([str(nrow * self.size + ncol) for ncol in range(self.size)]) + '\n'
         return string.rstrip('\n')
 
 
-class TttGame:
-    def __init__(self, size: int, user1: TttUser, user2: TttUser):
-        self._gamefield = TttField(size)
-        self.user1 = user1
-        self.user2 = user2
-        self.numbers = self._get_numbers()
+class TicTacGame:
+    def __init__(self, size: int, first_player: TicTacPlayer, second_player: TicTacPlayer):
+        self._gamefield = TicTacBoard(size)
+        self.player1 = first_player
+        self.player2 = second_player
 
-    def game(self):
-        win_flag = False
-        print(self.numbers)
-        users = cycle((self.user1, self.user2))
+    def start_game(self):
+        self._gamefield.update_board()
+        players = cycle((self.player1, self.player2))
+
         for i in range(self._gamefield.size ** 2):
-            user = next(users)
-            print(str(self._gamefield))
-            while True:
-                number = input(f'{user.name}`s move: ')
-                if any((not number.isdigit(),
-                       not 0 <= int(number) < self._gamefield.size ** 2)):
-                    print(f'{number} is not valid. Put digit, which is less {self._gamefield.size ** 2}')
-                    continue
-                number = int(number)
-                if self._gamefield.set_mark(number // self._gamefield.size,
-                                            number % self._gamefield.size,
-                                            user.mark):
-                    break
-                else:
-                    print('Field[number] must be free')
-                    continue
-
-            if self._gamefield.check_win(number // self._gamefield.size,
-                                         number % self._gamefield.size,
-                                         user.mark):
-                win_flag = True
-                print(f'Player {user.name} has won!')
+            player = next(players)
+            self._show_all_board()
+            row, column = self._make_move(player)
+            if self._gamefield.check_win(row, column, player.mark):
+                self._show_greeting(player)
                 break
-        if not win_flag:
-            print('Draw')
+        else:
+            self._show_draw()
+        self._show_board()
 
-    def _get_numbers(self) -> str:
-        numbers = ''
+    def _make_move(self, player) -> (int, int):
+        while True:
+            try:
+                number = self._parse_input(input(f'{player.name}`s ({player.mark}) move: '))
+                row = number // self._gamefield.size
+                column = number % self._gamefield.size # т.к. number = row * size + column
+                self._gamefield.set_mark(row, column, player.mark)
+            except PlayerInputError as e:
+                print(f'Put digit, which is less {self._gamefield.size ** 2}')
+            except SetMarkError as e:
+                print('Board[number] must be free')
+            else:
+                break
+        return row, column
+
+    def _parse_input(self, player_input: str) -> int:
+        if self._validate_input(player_input):
+            return int(player_input)
+
+    def _validate_input(self, player_input) -> bool:
+        if (not player_input.isdigit() or
+                not (0 <= int(player_input) < self._gamefield.size ** 2)):
+            raise PlayerInputError(f'{player_input} is not valid. Put digit, which is less {self._gamefield.size ** 2}')
+        else:
+            return True
+
+    def _show_board(self):
+        print(self._gamefield.show_board())
+
+    def _show_all_board(self):
+        # FIX. IndexError?
+        string = ''
+        board = self._gamefield.show_board().split('\n')
+        template = self._gamefield.get_template().split('\n')
         for i in range(self._gamefield.size):
-            ' '.join([str(i*self._gamefield.size+j) for j in range(self._gamefield.size)]) + '\n'
-        return numbers.rstrip('\n')
+            string += board[i] + '\t' + template[i] + '\n'
+        print(string.rstrip())
+
+    def _show_greeting(self, winner: TicTacPlayer):
+        print(f'Player {winner.name} has won!')
+
+    def _show_draw(self):
+        print('Draw')
 
 
 if __name__ == '__main__':
     name, mark = input('Write first user`s name and mark: name mark (x or o)').split()
-    user1 = TttUser(name, mark)
+    user1 = TicTacPlayer(name, mark)
     name, mark = input('Write first user`s name and mark: name mark (x or o)').split()
-    user2 = TttUser(name, mark)
-    game = TttGame(3, user1, user2)
-    game.game()
+    user2 = TicTacPlayer(name, mark)
+    game = TicTacGame(3, user1, user2)
+    game.start_game()
