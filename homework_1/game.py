@@ -64,7 +64,7 @@ class TicTacBoard:
 
 
 class TicTacGame:
-    quite_code = 'q!'
+    quit_code = 'q!'
     
     def __init__(self, first_player: TicTacPlayer, second_player: TicTacPlayer, size: int = 3):
         self._gamefield = TicTacBoard(size)
@@ -79,10 +79,13 @@ class TicTacGame:
         for i in range(self._gamefield.size ** 2):
             player = next(players)
             self._show_extended_board()
+
             try:
                 row, column = self._make_move(player)
             except InterruptedGameError:
+                print('The game is interrupted')
                 break
+
             if self._gamefield.check_win(row, column, player.mark):
                 self._show_greeting(player)
                 break
@@ -101,15 +104,12 @@ class TicTacGame:
                 print(f'Put digit, which is less {self._gamefield.size ** 2}')
             except SetMarkError as e:
                 print('Board[number] must be free')
-            except InterruptedGameError:
-                print('The game is interrupted')
-                raise
             else:
                 break
         return row, column
 
     def _parse_input(self, player_input: str) -> int:
-        if player_input == 'q!':
+        if player_input == self.quit_code:
             raise InterruptedGameError()
         elif self._validate_input(player_input):
             return int(player_input)
@@ -134,7 +134,7 @@ class TicTacGame:
         print('Draw')
 
     def _show_instructions(self):
-        print(f'Type \'{self.quite_code}\' to quit')
+        print(f'Type \'{self.quit_code}\' to quit')
 
 
 if __name__ == '__main__':
