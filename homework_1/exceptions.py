@@ -4,3 +4,7 @@ class SetMarkError(Exception):
 
 class PlayerInputError(Exception):
     pass
+
+
+class InterruptedGameError(Exception):
+    pass

@@ -1,5 +1,5 @@
 from itertools import cycle
-from exceptions import PlayerInputError, SetMarkError
+from exceptions import PlayerInputError, SetMarkError, InterruptedGameError
 from users import TicTacPlayer
 
 
@@ -64,19 +64,25 @@ class TicTacBoard:
 
 
 class TicTacGame:
-    def __init__(self, size: int, first_player: TicTacPlayer, second_player: TicTacPlayer):
+    quite_code = 'q!'
+    
+    def __init__(self, first_player: TicTacPlayer, second_player: TicTacPlayer, size: int = 3):
         self._gamefield = TicTacBoard(size)
         self.player1 = first_player
         self.player2 = second_player
 
     def start_game(self):
         self._gamefield.update_board()
+        self._show_instructions()
         players = cycle((self.player1, self.player2))
 
         for i in range(self._gamefield.size ** 2):
             player = next(players)
             self._show_extended_board()
-            row, column = self._make_move(player)
+            try:
+                row, column = self._make_move(player)
+            except InterruptedGameError:
+                break
             if self._gamefield.check_win(row, column, player.mark):
                 self._show_greeting(player)
                 break
@@ -84,7 +90,7 @@ class TicTacGame:
             self._show_draw()
         self._show_board()
 
-    def _make_move(self, player) -> (int, int):
+    def _make_move(self, player):
         while True:
             try:
                 number = self._parse_input(input(f'{player.name}`s ({player.mark}) move: '))
@@ -95,12 +101,17 @@ class TicTacGame:
                 print(f'Put digit, which is less {self._gamefield.size ** 2}')
             except SetMarkError as e:
                 print('Board[number] must be free')
+            except InterruptedGameError:
+                print('The game is interrupted')
+                raise
             else:
                 break
         return row, column
 
     def _parse_input(self, player_input: str) -> int:
-        if self._validate_input(player_input):
+        if player_input == 'q!':
+            raise InterruptedGameError()
+        elif self._validate_input(player_input):
             return int(player_input)
 
     def _validate_input(self, player_input) -> bool:
@@ -122,11 +133,14 @@ class TicTacGame:
     def _show_draw(self):
         print('Draw')
 
+    def _show_instructions(self):
+        print(f'Type \'{self.quite_code}\' to quit')
+
 
 if __name__ == '__main__':
     name, mark = input('Write first user`s name and mark: name mark (x or o) ').split()
     user1 = TicTacPlayer(name, mark)
     name, mark = input('Write first user`s name and mark: name mark (x or o) ').split()
     user2 = TicTacPlayer(name, mark)
-    game = TicTacGame(3, user1, user2)
+    game = TicTacGame(user1, user2, 4)
     game.start_game()
