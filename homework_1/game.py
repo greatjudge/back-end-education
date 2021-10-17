@@ -1,3 +1,5 @@
+""" TicTac Game """
+
 from itertools import cycle
 from typing import List
 
@@ -9,6 +11,10 @@ Board = List[List[str]]
 
 
 class TicTacBoard:
+    """ Is used by TicTacGame """
+
+    plug = '_'  # Empty board has plug in all cells
+
     def __init__(self, size: int = 3):
         self.size = size
         self._map = self._make_board(self.size)
@@ -20,11 +26,8 @@ class TicTacBoard:
             string += ' '.join(row) + '\n'
         return string.rstrip('\n')
 
-    @staticmethod
-    def _make_board(size: int) -> Board:
-        return [['_'] * size for _ in range(size)]
-
     def _make_layout(self):
+        """ Return user-friendly indices """
         string = ''
         for nrow in range(self.size):
             string += ' '.join([str(nrow * self.size + ncol)
@@ -37,17 +40,28 @@ class TicTacBoard:
         if not 0 <= int(column_number) < self.size:
             raise IndexError(f'column_number must be less {self.size} and larger 0')
 
+    def _make_board(self, size: int) -> Board:
+        return [[self.plug] * size for _ in range(size)]
+
     def set_mark(self, row_number: int,
                  column_number: int, mark: str):
+        """
+        Set mark in [row_number][column_number]
+        If cell is not free or mark is not str raise SetMarkError
+        """
         self._validate_indexes(row_number, column_number)
         if not isinstance(mark, str):
             raise SetMarkError
-        if self._map[row_number][column_number] == '_':
+        if self._map[row_number][column_number] == self.plug:
             self._map[row_number][column_number] = mark
         else:
             raise SetMarkError
 
-    def check_win(self, row_number, column_number, mark):
+    def check_win(self, row_number: int, column_number: int, mark: str):
+        """
+        Check position [row_number][column_number]
+            for a win (row, column, first diagonal, second diagonal)
+        """
         self._validate_indexes(row_number, column_number)
         vertical = all((self._map[i][column_number] == mark for i in range(self.size)))
         horizontal = all((self._map[row_number][j] == mark for j in range(self.size)))
@@ -62,10 +76,16 @@ class TicTacBoard:
                     horizontal,
                     diagonal))
 
-    def board(self):
+    def clear_board(self):
+        """ Set all cells on board to self.plug """
+        self._map = self._make_board(self.size)
+
+    def board(self) -> str:
+        """ Return board as a str """
         return str(self)
 
-    def extended_board(self):
+    def extended_board(self) -> str:
+        """ Return string of board with layout (user-friendly indices) """
         string = ''
         for nrow, row in enumerate(self._map):
             string += (' '.join([str(nrow * self.size + ncol)
@@ -74,14 +94,17 @@ class TicTacBoard:
         return string.rstrip()
 
     @property
-    def layout(self):
+    def layout(self) -> str:
+        """ Return user-friendly indices """
         return self._layout
-
-    def update_board(self):
-        self._map = self._make_board(self.size)
 
 
 class TicTacGame:
+    """
+    Console TicTac game
+    call start_game(first_name, second_name) to start
+    """
+
     quit_code = 'q'
 
     def __init__(self, size: int = 3):
@@ -89,18 +112,23 @@ class TicTacGame:
         self._gamefield = TicTacBoard(self._size)
 
     def show_instructions(self):
+        """ Print instructions in console """
         instructions = 'TicTak Game.\n First player: x, ' \
                        'Second player: o. Enter the number to put the symbol\n'
         quit_instructions = f' Type \'{self.quit_code}\' to quit\n'
         print(instructions + quit_instructions)
 
     def start_game(self, first_name: str, second_name: str):
-        self._gamefield.update_board()
+        """
+        Start new game with players:
+            first_name: 'x', second_name: 'o'
+        """
+        self._gamefield.clear_board()
         self.show_instructions()
         self._game(TicTacPlayer(first_name, 'x'),
                    TicTacPlayer(second_name, 'o'))
 
-    def _game(self, player1, player2):
+    def _game(self, player1: TicTacPlayer, player2: TicTacPlayer):
         players = cycle((player1, player2))
         for _ in range(self._gamefield.size ** 2):
             player = next(players)
@@ -120,7 +148,7 @@ class TicTacGame:
             self._show_board()
             self._show_draw()
 
-    def _make_move(self, player):
+    def _make_move(self, player: TicTacPlayer) -> tuple[int, int]:
         while True:
             try:
                 number = self._parse_input(self._player_input(player))
@@ -140,7 +168,7 @@ class TicTacGame:
             raise InterruptedGameError()
         return int(self._validate_input(player_input))
 
-    def _validate_input(self, player_input) -> str:
+    def _validate_input(self, player_input: str) -> str:
         if (not player_input.isdigit() or
                 not 0 <= int(player_input) < self._gamefield.size ** 2):
             raise PlayerInputError(f'{player_input} is not valid. '
@@ -162,7 +190,7 @@ class TicTacGame:
         print('Draw')
 
     @staticmethod
-    def _player_input(player):
+    def _player_input(player: TicTacPlayer) -> str:
         return input(f'{player.name}`s ({player.mark}) move: ').strip()
 
 

@@ -1,13 +1,8 @@
-class Player:
-    def __init__(self, name: str):
+class TicTacPlayer:
+    def __init__(self, name: str, mark: str):
         self.name = name
-
-
-class TicTacPlayer(Player):
-    def __init__(self, name, mark):
-        super().__init__(name)
         self._mark = mark
 
     @property
-    def mark(self):
+    def mark(self) -> str:
         return self._mark
