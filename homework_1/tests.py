@@ -62,6 +62,7 @@ class BoardCheckWinTest(unittest.TestCase):
             ((0, 2), (1, 1), (0, 2)): [['_', '_', 'x'], ['_', 'x', '_'], ['x', '_', '_']]
         }
         false_win_boards = []
+        draw_boards = []
 
     def test_true_win(self):
         with self.subTest():
@@ -71,6 +72,9 @@ class BoardCheckWinTest(unittest.TestCase):
                     self.assertTrue(self.board.check_win(row, column, 'x'))
 
     def test_false_win(self):
+        pass
+
+    def test_draw(self):
         pass
 
 

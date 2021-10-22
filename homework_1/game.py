@@ -13,7 +13,7 @@ Board = List[List[str]]
 class TicTacBoard:
     """ Is used by TicTacGame """
 
-    plug = '_'  # Empty board has plug in all cells
+    plug = '_'  # Empty board has plug on all cells
 
     def __init__(self, size: int = 3):
         self.size = size
@@ -50,8 +50,6 @@ class TicTacBoard:
         If cell is not free or mark is not str raise SetMarkError
         """
         self._validate_indexes(row_number, column_number)
-        if not isinstance(mark, str):
-            raise SetMarkError
         if self._map[row_number][column_number] == self.plug:
             self._map[row_number][column_number] = mark
         else:
@@ -172,7 +170,7 @@ class TicTacGame:
         if (not player_input.isdigit() or
                 not 0 <= int(player_input) < self._gamefield.size ** 2):
             raise PlayerInputError(f'{player_input} is not valid. '
-                                   f'Put digit, which is less {self._gamefield.size ** 2}')
+                                   f'Put number, which is less {self._gamefield.size ** 2}')
         return player_input
 
     def _show_board(self):
