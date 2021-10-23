@@ -4,7 +4,7 @@ from homework_2.custom_list.custom_list import CustomList
 
 class SubtractionTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.results = {((5, 1, 3, 7), (1, 2, 7)): [4, -1, -4, 7],  # FIX
+        self.results = {((5, 1, 3, 7), (1, 2, 7)): [4, -1, -4, 7],
                         ((1, 2, 7), (5, 1, 3, 7)): [-4, 1, 4, -7],
                         ((5, 1, 3, 7), (1, 2, 7, 3)): [4, -1, -4, 4],
                         ((1, ), (1, 2, 7, 3)): [0, -2, -7, -3],
@@ -13,6 +13,14 @@ class SubtractionTest(unittest.TestCase):
                         (tuple(), (1, 2, 7, 3)): [-1, -2, -7, -3],
                         (tuple(), tuple()): []}
 
+        self.false_results = {((5, 1, 3, 7), (1, 2, 7)): [4, -1, 0, 7],
+                        ((1, 2, 7), (5, 1, 3, 7)): [-4, 3, 4, -7],
+                        ((5, 1, 3, 7), (1, 2, 7, 3)): [1, -1, -4, 4],
+                        ((1,), (1, 2, 7, 3)): [0, 2, 7, -3],
+                        ((5, 1, 3, 7), (1,)): [5, 0, 3, 7],
+                        ((5, 1, 3, 7), tuple()): [-5, 1, -3, 7],
+                        (tuple(), (1, 2, 7, 3)): [-1, 2, -7, 3]}
+
     def test_correct_subtraction(self):
         with self.subTest():
             for (left, right), result in self.results.items():
@@ -20,6 +28,14 @@ class SubtractionTest(unittest.TestCase):
                 self.assertEqual(list(CustomList(left) - CustomList(right)), result)
                 self.assertEqual(list(CustomList(left) - right), result)
                 self.assertEqual(list(left - CustomList(right)), result)
+
+    def test_incorrect_subtraction(self):
+        with self.subTest():
+            for (left, right), result in self.false_results.items():
+                left, right = list(left), list(right)
+                self.assertNotEqual(list(CustomList(left) - CustomList(right)), result)
+                self.assertNotEqual(list(CustomList(left) - right), result)
+                self.assertNotEqual(list(left - CustomList(right)), result)
 
     def test_result_is_customlist(self):
         with self.subTest():
@@ -40,7 +56,7 @@ class SubtractionTest(unittest.TestCase):
 
 class AdditionTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.results = {((5, 1, 3, 7), (1, 2, 7)): [6, 3, 10, 7], # FIX
+        self.results = {((5, 1, 3, 7), (1, 2, 7)): [6, 3, 10, 7],
                         ((1, 2, 7), (5, 1, 3, 7)): [6, 3, 10, 7],
                         ((5, 1, 3, 7), (1, 2, 7, 3)): [6, 3, 10, 10],
                         ((1, ), (1, 2, 7, 3)): [2, 2, 7, 3],
@@ -49,6 +65,14 @@ class AdditionTest(unittest.TestCase):
                         (tuple(), (1, 2, 7, 3)): [1, 2, 7, 3],
                         (tuple(), tuple()): []}
 
+        self.false_results = {((5, 1, 3, 7), (1, 2, 7)): [-6, -3, 10, 7],
+                        ((1, 2, 7), (5, 1, 3, 7)): [6, 3, 10, 0],
+                        ((5, 1, 3, 7), (1, 2, 7, 3)): [6, 3, 3, 10],
+                        ((1,), (1, 2, 7, 3)): [2, -2, -7, 3],
+                        ((5, 1, 3, 7), (1,)): [0, -1, 3, 7],
+                        ((5, 1, 3, 7), tuple()): [1, 1, 3, 7],
+                        (tuple(), (1, 2, 7, 3)): [1, 3, 7, 3]}
+
     def test_correct_addition(self):
         with self.subTest():
             for (left, right), result in self.results.items():
@@ -56,6 +80,14 @@ class AdditionTest(unittest.TestCase):
                 self.assertEqual(CustomList(left) + CustomList(right), result)
                 self.assertEqual(CustomList(left) + right, result)
                 self.assertEqual(left + CustomList(right), result)
+
+    def test_incorrect_addition(self):
+        with self.subTest():
+            for (left, right), result in self.false_results.items():
+                left, right = list(left), list(right)
+                self.assertNotEqual(CustomList(left) + CustomList(right), result)
+                self.assertNotEqual(CustomList(left) + right, result)
+                self.assertNotEqual(left + CustomList(right), result)
 
     def test_result_is_customlist(self):
         with self.subTest():

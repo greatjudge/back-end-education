@@ -17,12 +17,3 @@ class CustomMeta(type):
         obj.__dict__ = obj_dict
         return obj
 
-
-class CustomClass(metaclass=CustomMeta):
-    x = 50
-
-    def __init__(self, val=99):
-        self.val = val
-
-    def line(self):
-        return 100
