@@ -1,6 +1,5 @@
 import unittest
-from homework_2.custom_list.custom_list import CustomList
-
+from custom_list import CustomList
 
 class SubtractionTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -124,13 +123,38 @@ class EqualTest(unittest.TestCase):
         for list1, list2 in self.equal.items():
             self.assertEqual(CustomList(list1), CustomList(list2))
             self.assertEqual(CustomList(list1), list2)
-            self.assertEqual(list1, CustomList(list2))
 
     def test_not_equal(self):
         for list1, list2 in self.not_equal.items():
             self.assertNotEqual(CustomList(list1), CustomList(list2))
             self.assertNotEqual(CustomList(list1), list2)
-            self.assertNotEqual(list1, CustomList(list2))
+
+class LessGreaterTest(unittest.TestCase):
+    def setUp(self):
+        self.less = {(1, 2, 3): (1, 2, 3, 4),
+                      (1, 2, 3, 4): (5, 5, 5),
+                      (5, 5): (1, 1, 19),
+                      (-1, -2, -3, -4): (-5, 5),
+                      (0, 0, 0, 0): (5, ),
+                      (): (0, 1, 0, 0)}
+        self.greater = {(1, 2, 3, 4): (1, 2, 3),
+                          (-1, -2, -3, -4): (-5, -5, -5),
+                          (5, 5): (1, 1),
+                          (1, 1): ()}
+
+    def test_equal(self):
+        for list1, list2 in self.less.items():
+            list1, list2 = list(list1), list(list2)
+            self.assertLess(CustomList(list1), CustomList(list2))
+            self.assertLess(CustomList(list1), list2)
+
+    def test_not_equal(self):
+        for list1, list2 in self.greater.items():
+            list1, list2 = list(list1), list(list2)
+            self.assertGreater(CustomList(list1), CustomList(list2))
+            self.assertGreater(CustomList(list1), list2)
+
+
 
 
 if __name__ == '__main__':
