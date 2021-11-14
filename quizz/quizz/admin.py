@@ -4,12 +4,12 @@ from .models import Test, Question, Choice
 
 class TestAdmin(admin.ModelAdmin):
     # Кастомизируем отображение модели в админке
-    list_display = ('id', 'slug', 'title')
+    list_display = ('id', 'title')
     # list_filter =
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'test', 'order', 'question')
+    list_display = ('id', 'test', 'order', 'title')
     list_filter = ('test',)
 
 

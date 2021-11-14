@@ -7,7 +7,6 @@ from django.urls import reverse
 
 class Test(models.Model):
     # creator = on delete set null
-    slug = models.SlugField(unique=True)
     title = models.CharField(max_length=50, verbose_name='Название')
     complexity = models.PositiveSmallIntegerField(blank=True, null=True,
                                                   verbose_name='Сложность')
@@ -16,7 +15,7 @@ class Test(models.Model):
     datetime = models.DateTimeField(auto_now=True, blank=True)
 
     def get_absolute_url(self):
-        return reverse('test_detail', kwargs={'slug': self.slug})
+        return reverse('tests_detail', kwargs={'test_id': self.id})
 
     def __str__(self):
         return self.title
@@ -55,19 +54,19 @@ class Choice(models.Model):
 
 
 class Question(models.Model):
-    question = models.CharField(max_length=200, verbose_name='вопрос')
+    order = models.PositiveSmallIntegerField(verbose_name='порядок вопроса в тесте')
+    title = models.CharField(max_length=200, verbose_name='вопрос')
     choices = models.ManyToManyField(Choice, verbose_name='варианты ответов',
                                      related_name='questions')
     answer = models.ForeignKey(Choice, related_name='question',
                                on_delete=models.CASCADE, blank=True,
                                verbose_name='ответ')
-    test = models.ForeignKey(Test, related_name='question',
+    test = models.ForeignKey(Test, related_name='questions',
                              on_delete=models.CASCADE, verbose_name='тест')
-    order = models.PositiveSmallIntegerField(verbose_name='порядок вопроса в тесте')
     # COMING SOON question_type
 
     def __str__(self):
-        return self.question
+        return self.title
 
     class Meta:
         verbose_name = 'Вопрос в тесте'
