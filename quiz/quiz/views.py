@@ -13,45 +13,30 @@ def index(request):
 @require_GET
 def tests_list(request):
     tests = Test.objects.all()
-    data = [
-            {
-             'id': test.id,
-             'title': test.title,
-            } for test in tests]
+    data = [{'id': test.id,
+             'title': test.title}
+            for test in tests]
     return JsonResponse({'tests': data})
 
 
 @require_GET
 def tests_detail(request, test_id):
     test = get_object_or_404(Test, id=test_id)
-    questions = [
-                 {'id': question.id,
-                  'question': question.title,
-                  'order': question.order,
-                  'is_active': question.is_active,
-                  'choices': [{'id': choice.id,
-                               'title': choice.title} for choice in question.choices.all()],
-                  'answer': {'id': question.answer.id,
-                             'title': question.answer.title}}
-                 for question in test.questions.all()]
-    data = [
-        {
-            'id': test.id,
-            'title': test.title,
-            'description': test.description,
-            'datetime': test.datetime,
-            'questions': questions,
-        }
-    ]
-    return JsonResponse({'test': data})
+    return JsonResponse({'test': test.to_json_detail()})
 
 
 @require_POST
 def tests_create(request):
-    pass
+    try:
+        test = Test.objects.create(title=request.POST.get('title')[0],
+                                   complexity=request.POST.get('complexity')[0],
+                                   description=request.POST.get('description')[0])
+        return JsonResponse({'status': 'ok',
+                             'id': test.id})
+    except TypeError:
+        return JsonResponse({'status': 'error'})
 
 
-@require_GET
 def tests_delete(request):
     pass
 
@@ -59,33 +44,30 @@ def tests_delete(request):
 @require_GET
 def questions_list(request):
     questions = Question.objects.all()
-    data = [
-        {
-            'id': question.id,
-            'title': question.title,
-        } for question in questions]
+    data = [{'id': question.id,
+            'title': question.title}
+            for question in questions]
     return JsonResponse({'questions': data})
 
 
 @require_GET
 def questions_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
-    choices = [{'id': choice.id} for choice in question.choices.all()]
-    data = [
-        {
-            'id': question.id,
-            'title': question.title,
-            'test': question.test.id,
-            'order': question.order,
-            'choices': choices,
-        }
-    ]
-    return JsonResponse({'test': data})
+    return JsonResponse({'test': question.to_json_detail()})
 
 
 @require_POST
 def questions_create(request):
-    pass
+    try:
+        pass
+        # question = Question.objects.create(title=request.POST.get('title')[0],
+        #                                    order=request.POST.get('order')[0])
+        #                                    # test=request.POST.get('test')[0],
+        #                                    # is_active=request.POST.get('is_active')[0])
+        return JsonResponse({'status': 'ok',
+                             'id': 1})
+    except TypeError as ex:
+        return JsonResponse({'status': 'error'})
 
 
 def questions_delete(request):
@@ -95,30 +77,25 @@ def questions_delete(request):
 @require_GET
 def choices_list(request):
     choices = Choice.objects.all()
-    data = [
-        {
-            'id': choice.id,
-            'title': choice.title,
-        } for choice in choices]
+    data = [{'id': choice.id,
+             'title': choice.title}
+            for choice in choices]
     return JsonResponse({'questions': data})
 
 
 @require_GET
 def choices_detail(request, choice_id):
     choice = get_object_or_404(Choice, id=choice_id)
-    questions = [{'id': question.id} for question in choice.questions.all()]
-    data = [
-        {
-            'id': choice.id,
-            'title': choice.title,
-            'questions': questions,
-        }
-    ]
-    return JsonResponse({'test': data})
+    return JsonResponse({'test': choice.to_json_detail()})
 
 
+@require_POST
 def choices_create(request):
-    pass
+    try:
+        return JsonResponse({'status': 'ok',
+                             'id': 1})
+    except TypeError:
+        return JsonResponse({'status': 'error'})
 
 
 def choices_delete(request):

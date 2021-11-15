@@ -5,6 +5,9 @@ from django.urls import reverse
 class Category(models.Model):
     title = models.CharField(max_length=100, verbose_name='название')
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
@@ -14,8 +17,8 @@ class Test(models.Model):
     # creator = models.ForeignKey(User, verbose_name='создатель',
     #                             on_delete=models.SET_NULL, related_name='answers')
     title = models.CharField(max_length=50, verbose_name='Название')
-    category = models.ManyToManyField(Category, related_name='tests',
-                                      verbose_name='категории теста')
+    categories = models.ManyToManyField(Category, related_name='tests',
+                                        verbose_name='категории теста')
     complexity = models.PositiveSmallIntegerField(blank=True, null=True,
                                                   verbose_name='Сложность')
     description = models.TextField(blank=True, null=True,
@@ -25,6 +28,15 @@ class Test(models.Model):
 
     def get_absolute_url(self):
         return reverse('tests_detail', kwargs={'test_id': self.id})
+
+    def to_json_detail(self):
+        return {'id': self.id,
+                'title': self.title,
+                'complexity': self.complexity,
+                'description': self.description,
+                'datetime': self.datetime,
+                'categories': [cat.title for cat in self.categories.all()],
+                'questions': [question.to_json_detail() for question in self.questions.all()]}
 
     def __str__(self):
         return self.title
@@ -45,6 +57,14 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
+    def to_json_detail(self):
+        return {'id': self.id,
+                'title': self.title,
+                'order': self.order,
+                'test': self.test.id,
+                'is_active': self.is_active,
+                'choices': [choice.to_json_detail() for choice in self.choices.all()]}
+
     class Meta:
         verbose_name = 'Вопрос в тесте'
         verbose_name_plural = 'Вопросы в тесте'
@@ -61,6 +81,12 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.title
+
+    def to_json_detail(self):
+        return {'id': self.id,
+                'title': self.title,
+                'question': self.question.id,
+                'is_right': self.is_right}
 
     class Meta:
         verbose_name = 'Вариант ответа'
