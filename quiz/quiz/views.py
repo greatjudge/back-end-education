@@ -28,9 +28,9 @@ def tests_detail(request, test_id):
 @require_POST
 def tests_create(request):
     try:
-        test = Test.objects.create(title=request.POST.get('title')[0],
-                                   complexity=request.POST.get('complexity')[0],
-                                   description=request.POST.get('description')[0])
+        test = Test.objects.create(title=request.POST.get('title'),
+                                   complexity=request.POST.get('complexity'),
+                                   description=request.POST.get('description'))
         return JsonResponse({'status': 'ok',
                              'id': test.id})
     except TypeError:
