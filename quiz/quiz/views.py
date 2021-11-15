@@ -31,10 +31,10 @@ def tests_create(request):
         test = Test.objects.create(title=request.POST.get('title'),
                                    complexity=request.POST.get('complexity'),
                                    description=request.POST.get('description'))
-        return JsonResponse({'status': 'ok',
+        return JsonResponse({'status': 'ok', # можно не передавать
                              'id': test.id})
     except TypeError:
-        return JsonResponse({'status': 'error'})
+        return JsonResponse({'status': 'error'}) # status_code
 
 
 def tests_delete(request):

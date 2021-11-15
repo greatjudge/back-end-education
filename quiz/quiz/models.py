@@ -113,7 +113,7 @@ class UserTest(models.Model):
     test = models.ForeignKey(Test, related_name='grades',
                              on_delete=models.CASCADE, verbose_name='тест')
     grade = models.FloatField()
-    datetime = models.DateTimeField(auto_now_add=True)
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='время прохождения теста')
 
     def __str__(self):
         return str(self.test)
