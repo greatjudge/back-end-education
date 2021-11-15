@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
-from .models import Test, Question, Choice, GradedTest
+from .models import Test, Question, Choice
 
 
 @require_GET
@@ -17,7 +17,6 @@ def tests_list(request):
             {
              'id': test.id,
              'title': test.title,
-             'datetime': test.datetime,
             } for test in tests]
     return JsonResponse({'tests': data})
 
@@ -29,6 +28,7 @@ def tests_detail(request, test_id):
                  {'id': question.id,
                   'question': question.title,
                   'order': question.order,
+                  'is_active': question.is_active,
                   'choices': [{'id': choice.id,
                                'title': choice.title} for choice in question.choices.all()],
                   'answer': {'id': question.answer.id,
@@ -123,44 +123,3 @@ def choices_create(request):
 
 def choices_delete(request):
     pass
-
-
-@require_GET
-def gradedtests_list(request):
-    gdtests = Choice.objects.all()
-    data = [
-        {
-            'id': gdtest.id,
-            'test_id': gdtest.test.id,
-            'test_title': gdtest.test.title,
-        } for gdtest in gdtests]
-    return JsonResponse({'questions': data})
-
-
-@require_GET
-def gradedtests_detail(request, gdtest_id):
-    gdtest = get_object_or_404(GradedTest, id=gdtest_id)
-    data = [
-        {
-            'id': gdtest.id,
-            'test_id': gdtest.test.id,
-            'test_title': gdtest.test.title,
-            'grade': gdtest.grade,
-            'datetime': gdtest.datetime
-        }
-    ]
-    return JsonResponse({'test': data})
-
-
-def gradedtests_create(request):
-    pass
-
-
-def gradedtests_delete(request):
-    pass
-
-
-
-
-
-

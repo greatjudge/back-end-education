@@ -15,7 +15,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 class ChoiceAdmin(admin.ModelAdmin):
     list_display = ('id', 'title')
-    list_filter = ('questions',)
+    list_filter = ('question',)
 
 
 # Register your models here.
