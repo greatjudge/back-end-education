@@ -74,7 +74,7 @@ class Question(models.Model):
 
 class Choice(models.Model):
     title = models.CharField(max_length=100, verbose_name='содержание')
-    question = models.ForeignKey(Question, related_name='choices', default=5,
+    question = models.ForeignKey(Question, related_name='choices',
                                  on_delete=models.CASCADE, verbose_name='вариант ответа')
     is_right = models.BooleanField(blank=True, default=False,
                                    verbose_name='правильный ответ')

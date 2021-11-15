@@ -59,14 +59,12 @@ def questions_detail(request, question_id):
 @require_POST
 def questions_create(request):
     try:
-        pass
         # question = Question.objects.create(title=request.POST.get('title')[0],
         #                                    order=request.POST.get('order')[0])
-        #                                    # test=request.POST.get('test')[0],
-        #                                    # is_active=request.POST.get('is_active')[0])
         return JsonResponse({'status': 'ok',
                              'id': 1})
     except TypeError as ex:
+        print(ex)
         return JsonResponse({'status': 'error'})
 
 
@@ -92,8 +90,11 @@ def choices_detail(request, choice_id):
 @require_POST
 def choices_create(request):
     try:
+        question = Question.objects.get(id=3)
+        choice = Choice.objects.create(title=request.POST.get('title')[0],
+                                       question=question)
         return JsonResponse({'status': 'ok',
-                             'id': 1})
+                             'id': choice.id})
     except TypeError:
         return JsonResponse({'status': 'error'})
 
