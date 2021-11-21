@@ -1,5 +1,9 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -14,10 +18,10 @@ class Category(models.Model):
 
 
 class Test(models.Model):
-    # creator = models.ForeignKey(User, verbose_name='создатель',
-    #                             on_delete=models.SET_NULL, related_name='answers')
+    creator = models.ForeignKey(User, verbose_name='создатель',
+                                on_delete=models.CASCADE, related_name='tests')
     title = models.CharField(max_length=50, verbose_name='Название')
-    categories = models.ManyToManyField(Category, related_name='tests',
+    categories = models.ManyToManyField(Category, related_name='tests', blank=True,
                                         verbose_name='категории теста')
     complexity = models.PositiveSmallIntegerField(blank=True, null=True,
                                                   verbose_name='Сложность')
@@ -44,6 +48,7 @@ class Test(models.Model):
     class Meta:
         verbose_name = 'Тест'
         verbose_name_plural = 'Тесты'
+        ordering = ['-datetime']
 
 
 class Question(models.Model):
@@ -69,13 +74,13 @@ class Question(models.Model):
         verbose_name = 'Вопрос в тесте'
         verbose_name_plural = 'Вопросы в тесте'
         ordering = ('order',)
-        unique_together = ['test', 'order']
+        # unique_together = ['test', 'order']
 
 
 class Choice(models.Model):
     title = models.CharField(max_length=100, verbose_name='содержание')
     question = models.ForeignKey(Question, related_name='choices',
-                                 on_delete=models.CASCADE, verbose_name='вариант ответа')
+                                 on_delete=models.CASCADE, verbose_name='вопрос')
     is_right = models.BooleanField(blank=True, default=False,
                                    verbose_name='правильный ответ')
 
@@ -93,27 +98,13 @@ class Choice(models.Model):
         verbose_name_plural = 'Варианты ответов'
 
 
-class UserAnswers(models.Model):
-    # user = models.ForeignKey(User, on_delete=models.CASCADE,
-    #                          related_name='answers', verbose_name='пользователь')
-    question = models.ForeignKey(Question, related_name='users_answer',
-                                 on_delete=models.CASCADE, verbose_name='вопрос')
-    choice_id = models.ForeignKey(Choice, related_name='users_answer',
-                                  on_delete=models.CASCADE, verbose_name='вариант ответа')
-    datetime = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = 'Ответ пользователя на вопрос'
-        verbose_name_plural = 'Ответы пользователя на вопросы'
-
-
 class UserTest(models.Model):
-    # user = models.ForeignKey(User, verbose_name='пользователь',
-    #                             on_delete=models.CASCADE, related_name='passed_tests')
+    user = models.ForeignKey(User, verbose_name='пользователь',
+                             on_delete=models.CASCADE, related_name='passed_tests')
     test = models.ForeignKey(Test, related_name='grades',
                              on_delete=models.CASCADE, verbose_name='тест')
     grade = models.FloatField()
-    datetime = models.DateTimeField(auto_now_add=True, verbose_name='время прохождения теста')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='время и дата прохождения теста')
 
     def __str__(self):
         return str(self.test)
@@ -123,3 +114,16 @@ class UserTest(models.Model):
         verbose_name_plural = 'Пройденные тесты'
 
 
+class UserAnswers(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='answers', verbose_name='пользователь')
+    question = models.ForeignKey(Question, related_name='users_answer',
+                                 on_delete=models.CASCADE, verbose_name='вопрос')
+    choice = models.ForeignKey(Choice, related_name='users_answer',
+                               on_delete=models.CASCADE, verbose_name='вариант ответа')
+    user_test = models.ForeignKey(UserTest, related_name='answers',
+                                  on_delete=models.CASCADE, verbose_name='пройденный тест')
+
+    class Meta:
+        verbose_name = 'Ответ пользователя на вопрос'
+        verbose_name_plural = 'Ответы пользователя на вопросы'

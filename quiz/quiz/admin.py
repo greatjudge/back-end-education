@@ -1,5 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from .models import Test, Question, Choice, Category
+
+
+User = get_user_model()
+
+
+class TestUser(admin.ModelAdmin):
+    list_display = ('id', 'username')
 
 
 class TestAdmin(admin.ModelAdmin):
@@ -25,6 +33,7 @@ class CategoryAdmin(admin.ModelAdmin):
 # Register your models here.
 
 # Подключаем модель к админке
+admin.site.register(User, TestUser)
 admin.site.register(Test, TestAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Choice, ChoiceAdmin)
