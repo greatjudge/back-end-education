@@ -74,7 +74,7 @@ class Question(models.Model):
         verbose_name = 'Вопрос в тесте'
         verbose_name_plural = 'Вопросы в тесте'
         ordering = ('order',)
-        # unique_together = ['test', 'order']
+        unique_together = ['test', 'order']
 
 
 class Choice(models.Model):

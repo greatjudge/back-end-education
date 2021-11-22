@@ -10,3 +10,9 @@ from quiz.models import Test, Question, Choice
 True
 >>> test_ser.save()
 """
+
+"""
+test_ser = TestSerializer(data={'title': 'test 3', 'creator': 1, 'questions': [{'title': 'question 1', 'order': 1},
+                                                                               {'title': 'question 2', 'order': 1}]})
+{'questions': [ErrorDetail(string='Orders of questions should not be repeated', code='invalid')]}                                                                              
+"""
