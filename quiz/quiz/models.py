@@ -87,12 +87,6 @@ class Choice(models.Model):
     def __str__(self):
         return self.title
 
-    def to_json_detail(self):
-        return {'id': self.id,
-                'title': self.title,
-                'question': self.question.id,
-                'is_right': self.is_right}
-
     class Meta:
         verbose_name = 'Вариант ответа'
         verbose_name_plural = 'Варианты ответов'

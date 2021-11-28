@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Test, Question, Choice, UserAnswers, UserTest
+from .models import Test, Question, Choice, UserAnswers, UserTest, Category
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
@@ -21,10 +21,24 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name, None)
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['title']
+
+
 class ChoiceSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Choice
         fields = '__all__'
+
+    def create(self, validated_data):
+        return Choice(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.is_right = validated_data.get('is_right', instance.is_right)
+        return instance
 
 
 class QuestionSerializer(DynamicFieldsModelSerializer):
@@ -41,14 +55,22 @@ class QuestionSerializer(DynamicFieldsModelSerializer):
             Choice.objects.create(question=question, **choice_data)
         return question
 
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.order = validated_data.get('order', instance.order)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.save()
+        return instance
+
 
 class TestSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, required=False, exclude=['test'])
+    categories = CategorySerializer(many=True, required=False)
 
     def validate_questions(self, attrs):
         orders = [question['order'] for question in attrs]
         if len(set(orders)) != len(orders):
-            raise serializers.ValidationError("Orders of questions"
+            raise serializers.ValidationError("The order of questions"
                                               " should not be repeated")
         return attrs
 
@@ -58,9 +80,51 @@ class TestSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         questions_data = validated_data.pop('questions', [])
+        categories_data = validated_data.pop('categories', [])
         test = Test.objects.create(**validated_data)
+
+        # create questions
         for ind, question_data in enumerate(questions_data):
             questions_data[ind]['test'] = test
         self.fields['questions'].create(questions_data)
+
+        # add categories
+        for category_data in categories_data:
+            category_qs = Category.objects.filter(title=category_data.get('title'))
+            if category_qs.exists():
+                category = category_qs.first()
+            else:
+                category = Category.objects.create(**category_data)
+            test.categories.add(category)
         return test
 
+    def update(self, instance, validated_data):
+        categories_data = validated_data.pop('categories')
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.complexity = validated_data.get('complexity', instance.complexity)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        instance.categories.clear()
+        for category_data in categories_data:
+            category_qs = Category.objects.filter(title=category_data.get('title'))
+            if category_qs.exists():
+                category = category_qs.first()
+            else:
+                category = Category.objects.create(**category_data)
+            instance.categories.add(category)
+
+        return instance
+
+
+class UserAnswersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAnswers
+        fields = '__all__'
+
+
+class UserTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserTest
+        fields = '__all__'
