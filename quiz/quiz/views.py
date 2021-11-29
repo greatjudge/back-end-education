@@ -1,14 +1,15 @@
-from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
-
-from .models import Test, Question, Choice
-from .serializers import *
 
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+from .serializers import TestSerializer, QuestionSerializer, ChoiceSerializer,\
+                         UserTestSerializer, UserAnswersSerializer, CategorySerializer
+from .models import Test, Question, Choice,\
+                    UserTest, UserAnswers, Category
 
 
 @require_GET
