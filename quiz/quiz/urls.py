@@ -1,21 +1,27 @@
 from django.urls import path
 from .views import *
-
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path('', index, name='index'),
-    path('tests/list/', tests_list, name='tests_list'),
-    path('tests/create/', tests_create, name='tests_create'),
-    path('tests/<int:test_id>/detail/', tests_detail, name='tests_detail'),
-    path('tests/<int:test_id>/delete/', tests_delete, name='tests_delete'),
 
-    path('questions/list/', questions_list, name='questions_list'),
-    path('questions/create/', questions_create, name='questions_create'),
-    path('questions/<int:question_id>/detail/', questions_detail, name='questions_detail'),
-    path('questions/<int:question_id>/delete/', questions_delete, name='questions_delete'),
+    path('tests/', TestList.as_view(), name='test_list'),
+    path('tests/<int:pk>/', TestDetail.as_view(), name='test_detail'),
 
-    path('choices/list/', choices_list, name='choices_list'),
-    path('choices/create/', choices_create, name='choices_create'),
-    path('choices/<int:choice_id>/detail/', choices_detail, name='choices_detail'),
-    path('choices/<int:choice_id>/delete/', choices_delete, name='choices_delete'),
+    path('questions/', QuestionList.as_view(), name='question_list'),
+    path('questions/<int:pk>/', QuestionDetail.as_view(), name='question_detail'),
+
+    path('choices/', ChoiceList.as_view(), name='choice_list'),
+    path('choices/<int:pk>/', ChoiceDetail.as_view(), name='choice_detail'),
+
+    path('categories/', CategoryList.as_view(), name='category_list'),
+    path('categories/<int:pk>/', CategoryDetail.as_view(), name='category_detail'),
+
+    path('user_tests/', UserTestList.as_view(), name='user_test_list'),
+    path('user_tests/<int:pk>/', UserTestDetail.as_view(), name='user_test_detail'),
+
+    path('user_answers/', UserAnswersList.as_view(), name='user_answer_list'),
+    path('user_answers/<int:pk>/', UserAnswersDetail.as_view(), name='user_answer_detail'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

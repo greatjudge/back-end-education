@@ -24,7 +24,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['title']
+        fields = '__all__'
 
 
 class ChoiceSerializer(DynamicFieldsModelSerializer):
@@ -33,7 +33,7 @@ class ChoiceSerializer(DynamicFieldsModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        return Choice(**validated_data)
+        return Choice.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
@@ -99,7 +99,7 @@ class TestSerializer(serializers.ModelSerializer):
         return test
 
     def update(self, instance, validated_data):
-        categories_data = validated_data.pop('categories')
+        categories_data = validated_data.pop('categories', [])
 
         instance.title = validated_data.get('title', instance.title)
         instance.complexity = validated_data.get('complexity', instance.complexity)

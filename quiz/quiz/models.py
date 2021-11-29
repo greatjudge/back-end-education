@@ -16,6 +16,9 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
+    def get_absolute_url(self):
+        return reverse('category_detail', kwargs={'pk': self.id})
+
 
 class Test(models.Model):
     creator = models.ForeignKey(User, verbose_name='создатель',
@@ -31,16 +34,7 @@ class Test(models.Model):
                                     verbose_name='дата и время создания')
 
     def get_absolute_url(self):
-        return reverse('tests_detail', kwargs={'test_id': self.id})
-
-    def to_json_detail(self):
-        return {'id': self.id,
-                'title': self.title,
-                'complexity': self.complexity,
-                'description': self.description,
-                'datetime': self.datetime,
-                'categories': [cat.title for cat in self.categories.all()],
-                'questions': [question.to_json_detail() for question in self.questions.all()]}
+        return reverse('test_detail', kwargs={'pk': self.id})
 
     def __str__(self):
         return self.title
@@ -62,13 +56,8 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
-    def to_json_detail(self):
-        return {'id': self.id,
-                'title': self.title,
-                'order': self.order,
-                'test': self.test.id,
-                'is_active': self.is_active,
-                'choices': [choice.to_json_detail() for choice in self.choices.all()]}
+    def get_absolute_url(self):
+        return reverse('question_detail', kwargs={'pk': self.id})
 
     class Meta:
         verbose_name = 'Вопрос в тесте'
@@ -87,6 +76,9 @@ class Choice(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('choice_detail', kwargs={'pk': self.id})
+
     class Meta:
         verbose_name = 'Вариант ответа'
         verbose_name_plural = 'Варианты ответов'
@@ -103,6 +95,9 @@ class UserTest(models.Model):
     def __str__(self):
         return str(self.test)
 
+    def get_absolute_url(self):
+        return reverse('user_test_detail', kwargs={'pk': self.id})
+
     class Meta:
         verbose_name = 'Пройденный тест'
         verbose_name_plural = 'Пройденные тесты'
@@ -117,6 +112,9 @@ class UserAnswers(models.Model):
                                on_delete=models.CASCADE, verbose_name='вариант ответа')
     user_test = models.ForeignKey(UserTest, related_name='answers',
                                   on_delete=models.CASCADE, verbose_name='пройденный тест')
+
+    def get_absolute_url(self):
+        return reverse('user_answer_detail', kwargs={'pk': self.id})
 
     class Meta:
         verbose_name = 'Ответ пользователя на вопрос'
