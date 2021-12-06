@@ -64,6 +64,7 @@ class QuestionSerializer(DynamicFieldsModelSerializer):
 
 
 class TestSerializer(serializers.ModelSerializer):
+    creator = serializers.ReadOnlyField(source='creator.id')
     questions = QuestionSerializer(many=True, required=False, exclude=['test'])
     categories = CategorySerializer(many=True, required=False)
 
@@ -79,6 +80,7 @@ class TestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
+        print(validated_data['creator'])
         questions_data = validated_data.pop('questions', [])
         categories_data = validated_data.pop('categories', [])
         test = Test.objects.create(**validated_data)

@@ -8,6 +8,8 @@ django = "*"
 python-dotenv = "*"
 psycopg2 = "*"
 djangorestframework = "*"
+social-auth-app-django = "*"
+django-widget-tweaks = "*"
 
 [dev-packages]
 pylint = "*"
