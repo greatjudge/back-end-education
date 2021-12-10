@@ -23,34 +23,6 @@ class LoginView(View):
     def get(self, request):
         return render(request, 'login.html', {'form':  CustomAuthForm()})
 
-    # def post(self, request):
-    #     form = AuthenticationForm(request, data=request.POST)
-    #     if form.is_valid():
-    #         user = authenticate(  # verify a set of credentials
-    #             request,
-    #             username=form.cleaned_data.get('username'),
-    #             password=form.cleaned_data.get('password')
-    #         )
-    #
-    #         if user is None:
-    #             return render(
-    #                 request,
-    #                 'login.html',
-    #                 { 'form': form, 'invalid_creds': True }
-    #             )
-    #
-    #         try:
-    #             form.confirm_login_allowed(user)  # check is_active
-    #         except ValidationError:
-    #             return render(
-    #                 request,
-    #                 'login.html',
-    #                 { 'form': form, 'invalid_creds': True }
-    #             )
-    #         login(request, user)  # associates the user with the session
-    #         return redirect(reverse('quiz'))
-    #     return render(request, 'login.html', {'form': form})
-
     def post(self, request):
         form = CustomAuthForm(request, data=request.POST)
         print(form)
@@ -71,10 +43,10 @@ class LoginView(View):
         return render(request, 'login.html', {'form': form})
 
     def delete(self, request):
-        return render(request, 'login.html', {'form': CustomAuthForm()})
+        return self.get(request)
 
     def put(self, request):
-        return render(request, 'login.html', {'form': CustomAuthForm()})
+        return self.get(request)
 
 
 class UserList(APIView):

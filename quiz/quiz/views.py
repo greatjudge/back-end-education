@@ -10,6 +10,7 @@ from .models import Test, Question, Choice, \
     UserTest, UserAnswers, Category
 
 from .decorators import own_login_required
+from .permissoins import IsOwnerOrReadOnly
 
 
 @require_GET
@@ -22,7 +23,6 @@ class TestList(APIView):
     """
     List all tests
     """
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, format=None):
         tests = Test.objects.all()
@@ -43,18 +43,22 @@ class TestDetail(APIView):
     """
     Retrieve, update or delete a test instance.
     """
+    permission_classes = [  # permissions.IsAuthenticatedOrReadOnly,
+                            IsOwnerOrReadOnly]
 
-    def get_object(self, pk):
-        return get_object_or_404(Test, pk=pk)
+    def get_object(self, pk, request):
+        obj = get_object_or_404(Test, pk=pk)
+        self.check_object_permissions(request, obj)
+        return obj
 
     def get(self, request, pk, format=None):
-        test = self.get_object(pk)
+        test = self.get_object(pk, request)
         serializer = TestSerializer(test)
         return Response(serializer.data)
 
     @own_login_required
     def put(self, request, pk, format=None):
-        test = self.get_object(pk)
+        test = self.get_object(pk, request)
         serializer = TestSerializer(test, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -63,7 +67,7 @@ class TestDetail(APIView):
 
     @own_login_required
     def delete(self, request, pk, format=None):
-        test = self.get_object(pk)
+        test = self.get_object(pk, request)
         test.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -237,8 +241,12 @@ class UserTestDetail(APIView):
     Retrieve, update or delete a user_test instance.
     """
 
-    def get_object(self, pk):
-        return get_object_or_404(UserTest, pk=pk)
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get_object(self, pk, request):
+        obj = get_object_or_404(UserTest, pk=pk)
+        self.check_object_permissions(request, obj)
+        return obj
 
     @own_login_required
     def get(self, request, pk, format=None):
@@ -258,6 +266,7 @@ class UserAnswersList(APIView):
     List all user_answers
     """
 
+    @own_login_required
     def get(self, request, format=None):
         user_answers = UserAnswers.objects.filter(user=request.user)
         serializer = UserAnswersSerializer(user_answers, many=True)
@@ -277,8 +286,12 @@ class UserAnswersDetail(APIView):
     Retrieve, update or delete a user_answer instance.
     """
 
-    def get_object(self, pk):
-        return get_object_or_404(UserAnswers, pk=pk)
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get_object(self, pk, request):
+        obj = get_object_or_404(UserAnswers, pk=pk)
+        self.check_object_permissions(request, obj)
+        return obj
 
     @own_login_required
     def get(self, request, pk, format=None):

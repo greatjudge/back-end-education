@@ -10,6 +10,9 @@ psycopg2 = "*"
 djangorestframework = "*"
 social-auth-app-django = "*"
 django-widget-tweaks = "*"
+bs4 = "*"
+lxml = "*"
+aiohttp = "*"
 
 [dev-packages]
 pylint = "*"
